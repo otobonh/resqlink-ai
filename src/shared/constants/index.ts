@@ -40,7 +40,7 @@ export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
   [ResourceType.OTHER]: 'Otro',
 }
 
-export const DEFAULT_MAP_CENTER = { lat: 4.711, lng: -74.0721 }
+export const DEFAULT_MAP_CENTER = { lat: 10.4880, lng: -66.8792 }
 export const DEFAULT_MAP_ZOOM = 12
 export const MAX_PHOTO_SIZE_MB = 5
 export const MAX_PHOTOS_PER_INCIDENT = 4

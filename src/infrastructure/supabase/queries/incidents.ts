@@ -1,29 +1,30 @@
 import { createClient } from '@/infrastructure/supabase/client'
 import type { Incident } from '@/domain/entities'
 import type { IncidentFormData } from '@/shared/types'
-
-const supabase = createClient()
+import { parseLocationField } from '@/shared/utils/geo'
 
 export async function getIncidents(filters?: {
   status?: string
   priority?: string
   category?: string
 }) {
+  const supabase = createClient()
   let query = supabase
     .from('incidents')
     .select('*')
     .order('created_at', { ascending: false })
 
-  if (filters?.status) query = query.eq('status', filters.status)
-  if (filters?.priority) query = query.eq('priority', filters.priority)
-  if (filters?.category) query = query.eq('category', filters.category)
+  if (filters?.status && filters.status !== 'all') query = query.eq('status', filters.status)
+  if (filters?.priority && filters.priority !== 'all') query = query.eq('priority', filters.priority)
+  if (filters?.category && filters.category !== 'all') query = query.eq('category', filters.category)
 
   const { data, error } = await query
   if (error) throw error
-  return data as Incident[]
+  return (data || []).map(parseLocationField) as unknown as Incident[]
 }
 
 export async function getIncidentById(id: string) {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from('incidents')
     .select('*')
@@ -31,13 +32,11 @@ export async function getIncidentById(id: string) {
     .single()
 
   if (error) throw error
-  return data as Incident
+  return parseLocationField(data) as unknown as Incident
 }
 
-export async function createIncident(
-  form: IncidentFormData,
-  reporterId: string
-) {
+export async function createIncident(form: IncidentFormData, reporterId: string) {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from('incidents')
     .insert({
@@ -59,10 +58,8 @@ export async function createIncident(
   return data as Incident
 }
 
-export async function updateIncident(
-  id: string,
-  updates: Partial<Incident>
-) {
+export async function updateIncident(id: string, updates: Partial<Incident>) {
+  const supabase = createClient()
   const { data, error } = await supabase
     .from('incidents')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -75,32 +72,20 @@ export async function updateIncident(
 }
 
 export async function getDashboardStats() {
+  const supabase = createClient()
   const [incidents, resources, volunteers, shelters, hospitals] =
     await Promise.all([
       supabase.from('incidents').select('status, affected_people'),
-      supabase
-        .from('resources')
-        .select('id')
-        .eq('available', true),
-      supabase
-        .from('volunteers')
-        .select('id')
-        .eq('status', 'available'),
+      supabase.from('resources').select('id').eq('available', true),
+      supabase.from('volunteers').select('id').eq('status', 'available'),
       supabase.from('shelters').select('id').eq('active', true),
       supabase.from('hospitals').select('id'),
     ])
 
   const allIncidents = incidents.data || []
-  const active = allIncidents.filter(
-    (i) => i.status !== 'resolved' && i.status !== 'closed'
-  )
-  const resolved = allIncidents.filter(
-    (i) => i.status === 'resolved' || i.status === 'closed'
-  )
-  const affected = active.reduce(
-    (sum, i) => sum + (i.affected_people || 0),
-    0
-  )
+  const active = allIncidents.filter((i) => i.status !== 'resolved' && i.status !== 'closed')
+  const resolved = allIncidents.filter((i) => i.status === 'resolved' || i.status === 'closed')
+  const affected = active.reduce((sum, i) => sum + (i.affected_people || 0), 0)
 
   return {
     active_incidents: active.length,

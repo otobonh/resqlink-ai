@@ -7,7 +7,8 @@ import { LoadingSpinner } from '@/presentation/components/common/loading'
 import { useRealtime } from '@/presentation/hooks/use-realtime'
 import { getIncidents } from '@/infrastructure/supabase/queries/incidents'
 import { getResources } from '@/infrastructure/supabase/queries/resources'
-import type { Incident, Resource } from '@/domain/entities'
+import { getHospitals, getShelters } from '@/infrastructure/supabase/queries/locations'
+import type { Incident, Resource, Hospital, Shelter } from '@/domain/entities'
 import type { MapMarker, MapFilter } from '@/shared/types'
 
 const EmergencyMap = dynamic(
@@ -18,6 +19,8 @@ const EmergencyMap = dynamic(
 export default function MapPage() {
   const [incidents, setIncidents] = useState<Incident[]>([])
   const [resources, setResources] = useState<Resource[]>([])
+  const [hospitals, setHospitals] = useState<Hospital[]>([])
+  const [shelters, setShelters] = useState<Shelter[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState<MapFilter>({
     incidents: true,
@@ -29,9 +32,16 @@ export default function MapPage() {
 
   const loadData = useCallback(async () => {
     try {
-      const [inc, res] = await Promise.all([getIncidents(), getResources()])
+      const [inc, res, hosp, shelt] = await Promise.all([
+        getIncidents(),
+        getResources(),
+        getHospitals(),
+        getShelters(),
+      ])
       setIncidents(inc)
       setResources(res)
+      setHospitals(hosp)
+      setShelters(shelt)
     } catch (err) {
       console.error(err)
     } finally {
@@ -64,14 +74,33 @@ export default function MapPage() {
       title: r.name,
       data: r,
     })),
+    ...hospitals.map((h): MapMarker => ({
+      id: h.id,
+      type: 'hospital',
+      lat: h.location?.lat || 0,
+      lng: h.location?.lng || 0,
+      title: h.name,
+    })),
+    ...shelters.map((s): MapMarker => ({
+      id: s.id,
+      type: 'shelter',
+      lat: s.location?.lat || 0,
+      lng: s.location?.lng || 0,
+      title: s.name,
+    })),
   ]
 
   if (loading) return <LoadingSpinner />
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Mapa de emergencias</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Mapa de emergencias</h1>
+          <p className="text-sm text-muted-foreground">
+            {incidents.length} incidentes · {resources.length} recursos · {hospitals.length} hospitales · {shelters.length} refugios
+          </p>
+        </div>
         <MapFilters filters={filters} onChange={setFilters} />
       </div>
       <EmergencyMap
