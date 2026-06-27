@@ -71,7 +71,8 @@ function extractNumbers(text: string): ExtractedStats {
   return stats
 }
 
-async function fetchNewsFromSupabase(supabase: ReturnType<typeof createClient>): Promise<NewsItem[]> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchNewsFromSupabase(supabase: any): Promise<NewsItem[]> {
   const { data } = await supabase
     .from('social_feed_items')
     .select('content, author_name, published_at')
