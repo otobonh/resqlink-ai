@@ -4,14 +4,9 @@ export default async () => {
   const appUrl = process.env.URL || 'https://resqlink-ai.netlify.app'
 
   try {
-    const [feedRes, statsRes] = await Promise.all([
-      fetch(`${appUrl}/api/social-feed/sync`),
-      fetch(`${appUrl}/api/stats-sync`),
-    ])
-    const feedData = await feedRes.json()
-    const statsData = await statsRes.json()
-    console.log('Feed sync:', feedData)
-    console.log('Stats sync:', statsData)
+    const res = await fetch(`${appUrl}/api/social-feed/sync`)
+    const data = await res.json()
+    console.log('Sync result:', data)
   } catch (err) {
     console.error('Sync failed:', err)
   }
