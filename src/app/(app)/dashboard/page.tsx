@@ -12,6 +12,7 @@ import { getHospitals, getShelters } from '@/infrastructure/supabase/queries/loc
 import type { DashboardStats, Incident, Resource, Hospital, Shelter } from '@/domain/entities'
 import type { MapMarker, MapFilter } from '@/shared/types'
 import { MapFilters } from '@/presentation/components/map/map-filters'
+import { XFeed } from '@/presentation/components/dashboard/x-feed'
 
 const EmergencyMap = dynamic(
   () =>
@@ -133,6 +134,10 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <XFeed />
       </div>
     </div>
   )

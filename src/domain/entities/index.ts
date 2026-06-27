@@ -152,6 +152,8 @@ export interface ActivityLog {
   created_at: string
 }
 
+export type { SocialFeedItem } from './social-feed'
+
 export interface DashboardStats {
   active_incidents: number
   affected_people: number
