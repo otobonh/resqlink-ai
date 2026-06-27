@@ -60,10 +60,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadData()
+    const interval = setInterval(loadData, 60 * 60 * 1000)
+    return () => clearInterval(interval)
   }, [loadData])
 
   useRealtime('incidents', () => loadData(), () => loadData())
   useRealtime('resources', () => loadData(), () => loadData())
+  useRealtime('hospitals', () => loadData(), () => loadData())
+  useRealtime('shelters', () => loadData(), () => loadData())
 
   if (loading) return <LoadingSpinner />
 

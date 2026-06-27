@@ -19,6 +19,20 @@ interface RSSItem {
   description: string
 }
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<!\[CDATA\[|\]\]>/g, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function parseRSSItems(xml: string): RSSItem[] {
   const items: RSSItem[] = []
   const itemRegex = /<item>([\s\S]*?)<\/item>/g
@@ -34,28 +48,19 @@ function parseRSSItems(xml: string): RSSItem[] {
     const sourceMatch = itemXml.match(/<source[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/source>/)
     const sourceAttr = itemXml.match(/<source[^>]*url="([^"]*)"/)
 
+    const rawTitle = get('title')
+    const cleanTitle = stripHtml(rawTitle)
+
     items.push({
-      title: get('title'),
+      title: cleanTitle,
       link: get('link') || (sourceAttr ? sourceAttr[1] : ''),
       pubDate: get('pubDate'),
-      creator: sourceMatch ? sourceMatch[1].trim() : get('dc:creator') || get('creator') || '',
-      description: get('title'),
+      creator: sourceMatch ? stripHtml(sourceMatch[1]) : get('dc:creator') || get('creator') || '',
+      description: cleanTitle,
     })
   }
 
   return items
-}
-
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .trim()
 }
 
 function extractSource(creator: string, link: string): { name: string; handle: string } {
