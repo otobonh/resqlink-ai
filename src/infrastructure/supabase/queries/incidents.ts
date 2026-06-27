@@ -35,7 +35,7 @@ export async function getIncidentById(id: string) {
   return parseLocationField(data) as unknown as Incident
 }
 
-export async function createIncident(form: IncidentFormData, reporterId: string) {
+export async function createIncident(form: IncidentFormData, reporterId: string, photoUrls: string[] = []) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('incidents')
@@ -49,7 +49,7 @@ export async function createIncident(form: IncidentFormData, reporterId: string)
       location: `POINT(${form.lng} ${form.lat})`,
       address: form.address,
       affected_people: form.affected_people,
-      photos: [],
+      photos: photoUrls,
     })
     .select()
     .single()

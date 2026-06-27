@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Save, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,20 +12,28 @@ import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const { profile } = useAuth()
-  const [fullName, setFullName] = useState(profile?.full_name || '')
-  const [phone, setPhone] = useState(profile?.phone || '')
+  const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name || '')
+      setPhone(profile.phone || '')
+    }
+  }, [profile])
 
   const handleSave = async () => {
     if (!profile) return
     setLoading(true)
     try {
       const supabase = createClient()
-      await supabase
+      const { error } = await supabase
         .from('users')
         .update({ full_name: fullName, phone, updated_at: new Date().toISOString() })
         .eq('id', profile.id)
 
+      if (error) throw error
       toast.success('Perfil actualizado')
     } catch {
       toast.error('Error al guardar')
@@ -37,7 +45,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Configuración</h1>
+        <h1 className="text-2xl font-bold">Configuracion</h1>
         <p className="text-muted-foreground">Administra tu perfil</p>
       </div>
 
@@ -55,7 +63,7 @@ export default function SettingsPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label>Teléfono</Label>
+            <Label>Telefono</Label>
             <Input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}

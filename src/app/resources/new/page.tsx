@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { ResourceForm } from '@/presentation/components/resources/resource-form'
 import { createResource } from '@/infrastructure/supabase/queries/resources'
 import { createClient } from '@/infrastructure/supabase/client'
@@ -52,11 +51,9 @@ export default function NewResourcePage() {
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-lg mx-auto">
-        <Link href="/">
-          <Button variant="ghost" className="mb-4 gap-2">
-            <ArrowLeft size={18} />
-            Volver
-          </Button>
+        <Link href="/" className="inline-flex items-center gap-2 mb-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft size={18} />
+          Volver
         </Link>
         <ResourceForm onSubmit={handleSubmit} loading={loading} />
       </div>

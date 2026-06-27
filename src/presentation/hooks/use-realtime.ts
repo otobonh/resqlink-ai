@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { subscribeToTable, unsubscribe } from '@/infrastructure/supabase/realtime'
 
 export function useRealtime(
@@ -9,17 +9,25 @@ export function useRealtime(
   onUpdate?: (record: unknown) => void,
   onDelete?: (record: unknown) => void
 ) {
+  const onInsertRef = useRef(onInsert)
+  const onUpdateRef = useRef(onUpdate)
+  const onDeleteRef = useRef(onDelete)
+
+  onInsertRef.current = onInsert
+  onUpdateRef.current = onUpdate
+  onDeleteRef.current = onDelete
+
   useEffect(() => {
     const channel = subscribeToTable(table, (payload) => {
       switch (payload.eventType) {
         case 'INSERT':
-          onInsert?.(payload.new)
+          onInsertRef.current?.(payload.new)
           break
         case 'UPDATE':
-          onUpdate?.(payload.new)
+          onUpdateRef.current?.(payload.new)
           break
         case 'DELETE':
-          onDelete?.(payload.old)
+          onDeleteRef.current?.(payload.old)
           break
       }
     })
@@ -27,5 +35,5 @@ export function useRealtime(
     return () => {
       unsubscribe(channel)
     }
-  }, [table, onInsert, onUpdate, onDelete])
+  }, [table])
 }
