@@ -31,12 +31,15 @@ function parseRSSItems(xml: string): RSSItem[] {
       return m ? (m[1] || m[2] || '').trim() : ''
     }
 
+    const sourceMatch = itemXml.match(/<source[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/source>/)
+    const sourceAttr = itemXml.match(/<source[^>]*url="([^"]*)"/)
+
     items.push({
       title: get('title'),
-      link: get('link'),
+      link: get('link') || (sourceAttr ? sourceAttr[1] : ''),
       pubDate: get('pubDate'),
-      creator: get('dc:creator') || get('creator') || get('source'),
-      description: get('description'),
+      creator: sourceMatch ? sourceMatch[1].trim() : get('dc:creator') || get('creator') || '',
+      description: get('title'),
     })
   }
 
@@ -138,7 +141,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabase
       .from('social_feed_items')
-      .upsert(rows, { onConflict: 'external_id', ignoreDuplicates: true })
+      .upsert(rows, { onConflict: 'external_id', ignoreDuplicates: false })
       .select('id')
 
     if (error) {

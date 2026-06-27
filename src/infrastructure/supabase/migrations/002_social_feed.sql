@@ -22,3 +22,5 @@ CREATE INDEX idx_social_feed_query ON social_feed_items (search_query);
 ALTER TABLE social_feed_items ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public read social feed" ON social_feed_items FOR SELECT USING (true);
 CREATE POLICY "Service insert social feed" ON social_feed_items FOR INSERT WITH CHECK (true);
+CREATE POLICY "Service update social feed" ON social_feed_items FOR UPDATE USING (true);
+CREATE POLICY "Service delete social feed" ON social_feed_items FOR DELETE USING (true);
