@@ -1,7 +1,6 @@
 'use client'
 
 import { Bell, User } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -20,29 +19,28 @@ export function Header() {
       <div />
 
       <div className="flex items-center gap-3">
-        <Link href="/notifications">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell size={20} />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full" />
-          </Button>
+        <Link
+          href="/notifications"
+          className="relative inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-muted transition-colors"
+        >
+          <Bell size={20} />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full" />
         </Link>
 
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                  {profile?.full_name?.charAt(0) || <User size={16} />}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center h-9 w-9 rounded-full hover:bg-muted transition-colors cursor-pointer">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                {profile?.full_name?.charAt(0) || <User size={16} />}
+              </AvatarFallback>
+            </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem>
-              <Link href="/settings">Configuración</Link>
+              <Link href="/settings" className="w-full">Configuracion</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={signOut} className="text-destructive">
-              Cerrar sesión
+            <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
+              Cerrar sesion
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
